@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, Users as UsersIcon, X, History, User, Banknote, Edit2, Trash2, Printer, MessageCircle, Share2, Loader2 } from 'lucide-react';
+import { Plus, Search, Users as UsersIcon, X, History, User, Banknote, Edit2, Trash2, Printer, MessageCircle, Share2, Loader2, Calendar } from 'lucide-react';
 import { useAppData, Customer } from '@/src/context/AppDataContext';
 import { captureElementToCanvas } from '../utils/canvasCapture';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
@@ -14,6 +14,7 @@ export default function Customers() {
   
   const [paymentCustomer, setPaymentCustomer] = useState<Customer | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<number | ''>('');
+  const [paymentDate, setPaymentDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   
   const [newCustomer, setNewCustomer] = useState<{
@@ -98,9 +99,10 @@ export default function Customers() {
   const handlePayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (paymentCustomer && paymentAmount) {
-      recordCustomerPayment(paymentCustomer.id, Number(paymentAmount));
+      recordCustomerPayment(paymentCustomer.id, Number(paymentAmount), paymentDate);
       setPaymentCustomer(null);
       setPaymentAmount('');
+      setPaymentDate(new Date().toISOString().split('T')[0]);
     }
   };
 
@@ -424,6 +426,7 @@ export default function Customers() {
                           onClick={() => {
                             setPaymentCustomer(customer);
                             setPaymentAmount(customer.balance);
+                            setPaymentDate(new Date().toISOString().split('T')[0]);
                           }}
                           className="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg font-bold text-xs hover:bg-emerald-100 transition-colors flex items-center gap-1 cursor-pointer"
                         >
@@ -525,6 +528,7 @@ export default function Customers() {
                                 e.stopPropagation();
                                 setPaymentCustomer(customer);
                                 setPaymentAmount(customer.balance);
+                                setPaymentDate(new Date().toISOString().split('T')[0]);
                               }}
                               className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-[#EFF6FF] text-[#2563EB] rounded-lg font-bold text-xs hover:bg-[#DBEAFE] transition-colors border-none cursor-pointer"
                             >
@@ -703,7 +707,21 @@ export default function Customers() {
                 <p className="text-sm text-[#1E3A8A] font-bold">الرصيد المستحق: <span className="text-xl inline-block mr-1">{Number(paymentCustomer.balance || 0).toLocaleString()}</span> ج.م</p>
               </div>
 
-              <div className="space-y-1 mt-4">
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-[#475569] flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-[#2563EB]" />
+                  <span>تاريخ السداد</span>
+                </label>
+                <input 
+                  type="date"
+                  required
+                  value={paymentDate}
+                  onChange={e => setPaymentDate(e.target.value)}
+                  className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2.5 text-sm font-bold text-[#1E293B] focus:ring-2 focus:ring-[#2563EB] focus:outline-none bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
                 <label className="text-sm font-bold text-[#475569]">المبلغ المسدد (ج.م)</label>
                 <div className="relative">
                   <input 

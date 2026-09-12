@@ -367,8 +367,8 @@ type AppDataContextType = {
   deleteInvoice: (id: string) => Promise<void>;
   
   createPurchase: (purchase: Omit<PurchaseOrder, 'id'>) => Promise<void>;
-  recordCustomerPayment: (customerId: string, amount: number) => Promise<void>;
-  recordSupplierPayment: (supplierId: string, amount: number) => Promise<void>;
+  recordCustomerPayment: (customerId: string, amount: number, paymentDate?: string) => Promise<void>;
+  recordSupplierPayment: (supplierId: string, amount: number, paymentDate?: string) => Promise<void>;
   
   markAllNotificationsRead: () => Promise<void>;
   updateBusinessProfile: (profile: BusinessProfile) => Promise<void>;
@@ -1391,21 +1391,24 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }, `purchases/${newId}`);
   }, [inventory, suppliers, uid]);
 
-  const recordCustomerPayment = useCallback(async (customerId: string, amount: number) => {
+  const recordCustomerPayment = useCallback(async (customerId: string, amount: number, paymentDate?: string) => {
     if (amount <= 0) return;
     const invoiceNumber = `PAY-${1000 + invoices.length + 1}`;
     const newRef = doc(collection(db, 'users', uid, 'invoices'));
     const newId = newRef.id;
 
+    const dateToUse = paymentDate ? new Date(paymentDate + 'T12:00:00').toISOString() : new Date().toISOString();
+    const timeToUse = paymentDate ? new Date(paymentDate + 'T12:00:00').getTime() : Date.now();
+
     const newPayInv: Invoice = {
       id: newId,
       invoiceNumber,
-      date: new Date().toISOString(),
+      date: dateToUse,
       customerId,
       items: [],
       total: 0,
       paid: amount,
-      createdAt: Date.now(),
+      createdAt: timeToUse,
       updatedAt: Date.now()
     };
 
@@ -1425,12 +1428,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       batch.set(newRef, {
         ownerId: uid,
         invoiceNumber,
-        date: new Date().toISOString(),
+        date: dateToUse,
         customerId,
         items: [],
         total: 0,
         paid: amount,
-        createdAt: Date.now(),
+        createdAt: timeToUse,
         updatedAt: Date.now()
       });
 
@@ -1444,19 +1447,22 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }, `invoices/${newId}`);
   }, [customers, invoices.length, uid]);
 
-  const recordSupplierPayment = useCallback(async (supplierId: string, amount: number) => {
+  const recordSupplierPayment = useCallback(async (supplierId: string, amount: number, paymentDate?: string) => {
     if (amount <= 0) return;
     const newRef = doc(collection(db, 'users', uid, 'purchases'));
     const newId = newRef.id;
 
+    const dateToUse = paymentDate ? new Date(paymentDate + 'T12:00:00').toISOString() : new Date().toISOString();
+    const timeToUse = paymentDate ? new Date(paymentDate + 'T12:00:00').getTime() : Date.now();
+
     const newPayPur: PurchaseOrder = {
       id: newId,
-      date: new Date().toISOString(),
+      date: dateToUse,
       supplierId,
       items: [],
       total: 0,
       paid: amount,
-      createdAt: Date.now(),
+      createdAt: timeToUse,
       updatedAt: Date.now()
     };
 
@@ -1475,12 +1481,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       const batch = writeBatch(db);
       batch.set(newRef, {
         ownerId: uid,
-        date: new Date().toISOString(),
+        date: dateToUse,
         supplierId,
         items: [],
         total: 0,
         paid: amount,
-        createdAt: Date.now(),
+        createdAt: timeToUse,
         updatedAt: Date.now()
       });
 

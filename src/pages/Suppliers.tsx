@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, X, Factory, ArrowDownToLine, ShoppingCart, History, Edit2, Trash2, Banknote, Printer, Share2, Loader2, MessageCircle } from 'lucide-react';
+import { Plus, Search, X, Factory, ArrowDownToLine, ShoppingCart, History, Edit2, Trash2, Banknote, Printer, Share2, Loader2, MessageCircle, Calendar } from 'lucide-react';
 import { useAppData, Supplier } from '@/src/context/AppDataContext';
 import ProductSearchSelect from '../components/ProductSearchSelect';
 import { captureElementToCanvas } from '../utils/canvasCapture';
@@ -15,6 +15,7 @@ export default function Suppliers() {
   
   const [paymentSupplier, setPaymentSupplier] = useState<Supplier | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<number | ''>('');
+  const [paymentDate, setPaymentDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
 
   const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
   const [purchaseItems, setPurchaseItems] = useState<{inventoryId: string; isNew: boolean; newName: string; newSellPrice: number; qty: number; cost: number;}[]>([{ inventoryId: '', isNew: false, newName: '', newSellPrice: 0, qty: 1, cost: 0 }]);
@@ -297,9 +298,10 @@ export default function Suppliers() {
   const handlePaymentSupplier = (e: React.FormEvent) => {
     e.preventDefault();
     if (paymentSupplier && paymentAmount) {
-      recordSupplierPayment(paymentSupplier.id, Number(paymentAmount));
+      recordSupplierPayment(paymentSupplier.id, Number(paymentAmount), paymentDate);
       setPaymentSupplier(null);
       setPaymentAmount('');
+      setPaymentDate(new Date().toISOString().split('T')[0]);
     }
   };
 
@@ -615,6 +617,7 @@ export default function Suppliers() {
                         onClick={() => {
                           setPaymentSupplier(supplier);
                           setPaymentAmount(supplier.balance);
+                          setPaymentDate(new Date().toISOString().split('T')[0]);
                         }}
                         className="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg font-bold text-xs hover:bg-emerald-100 transition-colors flex items-center gap-1 cursor-pointer"
                       >
@@ -714,6 +717,7 @@ export default function Suppliers() {
                               e.stopPropagation();
                               setPaymentSupplier(supplier);
                               setPaymentAmount(supplier.balance);
+                              setPaymentDate(new Date().toISOString().split('T')[0]);
                             }}
                             className="inline-flex items-center justify-center gap-2 px-3 py-2 bg-[#EFF6FF] text-[#2563EB] rounded-lg font-bold text-xs hover:bg-[#DBEAFE] transition-colors border-none cursor-pointer"
                           >
@@ -1124,7 +1128,21 @@ export default function Suppliers() {
                 <p className="text-sm text-[#1E3A8A] font-bold">المطلوب سداده: <span className="text-xl inline-block mr-1">{Number(paymentSupplier.balance || 0).toLocaleString()}</span> ج.م</p>
               </div>
 
-              <div className="space-y-1 mt-4">
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-[#475569] flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-[#2563EB]" />
+                  <span>تاريخ السداد</span>
+                </label>
+                <input 
+                  type="date"
+                  required
+                  value={paymentDate}
+                  onChange={e => setPaymentDate(e.target.value)}
+                  className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2.5 text-sm font-bold text-[#1E293B] focus:ring-2 focus:ring-[#2563EB] focus:outline-none bg-white"
+                />
+              </div>
+
+              <div className="space-y-1">
                 <label className="text-sm font-bold text-[#475569]">المبلغ المسدد نقداً (ج.م)</label>
                 <div className="relative">
                   <input 
