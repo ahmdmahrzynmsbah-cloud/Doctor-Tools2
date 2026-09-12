@@ -1,60 +1,25 @@
 const fs = require('fs');
-const content = fs.readFileSync('src/pages/Invoices.tsx', 'utf-8');
+let content = fs.readFileSync('src/pages/Suppliers.tsx', 'utf8');
 
-const searchStr = `            {printingInvoice.items.length <= 8 && (
-              <button 
-                onClick={downloadAsImage}
-                disabled={isSharingImage}
-                className="px-4 sm:px-6 py-2 bg-[#16A34A] text-white rounded-lg text-sm font-bold hover:bg-[#15803D] flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-75 disabled:cursor-wait"
-              >
-                {isSharingImage ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Download className="w-4 h-4 sm:w-5 sm:h-5" />}
-                {isSharingImage ? 'جاري المعالجة...' : 'تحميل كصورة'}
-              </button>
-            )}
-            <button 
-              onClick={() => setPrintingInvoiceId(null)}
-              className="px-4 sm:px-6 py-2 bg-[#F1F5F9] text-[#475569] border border-[#E2E8F0] rounded-lg text-sm font-bold hover:bg-[#E2E8F0] cursor-pointer"
-            >
-              عودة
-            </button>`;
+content = content.replace(/\(item\.quantity \* itemPrice\)\.toLocaleString\(\)/g, 'Number((item.quantity || 0) * (itemPrice || 0)).toLocaleString()');
+content = content.replace(/price\.toLocaleString\(\)/g, 'Number(price || 0).toLocaleString()');
+content = content.replace(/\(qty \* price\)\.toLocaleString\(\)/g, 'Number((qty || 0) * (price || 0)).toLocaleString()');
+content = content.replace(/total\.toLocaleString\(\)/g, 'Number(total || 0).toLocaleString()');
+content = content.replace(/paid\.toLocaleString\(\)/g, 'Number(paid || 0).toLocaleString()');
+content = content.replace(/\(total - paid\)\.toLocaleString\(\)/g, 'Number((total || 0) - (paid || 0)).toLocaleString()');
+content = content.replace(/row\.credit\.toLocaleString\(\)/g, 'Number(row.credit || 0).toLocaleString()');
+content = content.replace(/row\.debit\.toLocaleString\(\)/g, 'Number(row.debit || 0).toLocaleString()');
+content = content.replace(/Math\.abs\(row\.balance\)\.toLocaleString\(\)/g, 'Math.abs(Number(row.balance || 0)).toLocaleString()');
+content = content.replace(/row\.rawPurchase\.total\.toLocaleString\(\)/g, 'Number(row.rawPurchase.total || 0).toLocaleString()');
+content = content.replace(/row\.rawPurchase\.paid\.toLocaleString\(\)/g, 'Number(row.rawPurchase.paid || 0).toLocaleString()');
+content = content.replace(/\(row\.rawPurchase\.total - row\.rawPurchase\.paid\)\.toLocaleString\(\)/g, 'Number((row.rawPurchase.total || 0) - (row.rawPurchase.paid || 0)).toLocaleString()');
+content = content.replace(/purchaseItems\.reduce\(\(sum, item\) => sum \+ \(item\.qty \* item\.cost\), 0\)\.toLocaleString\(\)/g, 'Number(purchaseItems.reduce((sum, item) => sum + ((item.qty || 0) * (item.cost || 0)), 0)).toLocaleString()');
+content = content.replace(/unitPrice\.toLocaleString\(\)/g, 'Number(unitPrice || 0).toLocaleString()');
+content = content.replace(/\(item\.quantity \* unitPrice\)\.toLocaleString\(\)/g, 'Number((item.quantity || 0) * (unitPrice || 0)).toLocaleString()');
+content = content.replace(/printingPurchase\.total\.toLocaleString\(\)/g, 'Number(printingPurchase.total || 0).toLocaleString()');
+content = content.replace(/printingPurchase\.paid\.toLocaleString\(\)/g, 'Number(printingPurchase.paid || 0).toLocaleString()');
+content = content.replace(/\(printingPurchase\.total - printingPurchase\.paid\)\.toLocaleString\(\)/g, 'Number((printingPurchase.total || 0) - (printingPurchase.paid || 0)).toLocaleString()');
 
-const replaceStr = `            {printingInvoice.items.length <= 8 && (
-              <button 
-                onClick={downloadAsImage}
-                disabled={isSharingImage}
-                className="px-4 sm:px-6 py-2 bg-[#16A34A] text-white rounded-lg text-sm font-bold hover:bg-[#15803D] flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-75 disabled:cursor-wait"
-              >
-                {isSharingImage ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Download className="w-4 h-4 sm:w-5 sm:h-5" />}
-                {isSharingImage ? 'جاري المعالجة...' : 'تحميل كصورة'}
-              </button>
-            )}
-            <button 
-              onClick={downloadAsPdf}
-              disabled={isSharingImage}
-              className="px-4 sm:px-6 py-2 bg-[#DC2626] text-white rounded-lg text-sm font-bold hover:bg-[#B91C1C] flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-75 disabled:cursor-wait"
-            >
-              {isSharingImage ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <FileText className="w-4 h-4 sm:w-5 sm:h-5" />}
-              {isSharingImage ? 'جاري المعالجة...' : 'تحميل PDF'}
-            </button>
-            {downloadPreviewUrl && (
-              <button 
-                onClick={handleMobileShare}
-                className="px-4 sm:px-6 py-2 bg-[#8B5CF6] text-white rounded-lg text-sm font-bold hover:bg-[#7C3AED] flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                مشاركة
-              </button>
-            )}
-            <button 
-              onClick={() => setPrintingInvoiceId(null)}
-              className="px-4 sm:px-6 py-2 bg-[#F1F5F9] text-[#475569] border border-[#E2E8F0] rounded-lg text-sm font-bold hover:bg-[#E2E8F0] cursor-pointer"
-            >
-              عودة
-            </button>`;
 
-if (content.includes(searchStr)) {
-  fs.writeFileSync('src/pages/Invoices.tsx', content.replace(searchStr, replaceStr));
-  console.log("Success");
-} else {
-  console.log("Not found");
-}
+fs.writeFileSync('src/pages/Suppliers.tsx', content);
+console.log('Patched Suppliers');

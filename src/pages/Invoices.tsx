@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, Search, FileText, X, Printer, Edit, Trash2, ListStart, List, Barcode, Receipt, Save, Download, MessageCircle, Share2, Loader2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -31,7 +32,7 @@ export default function Invoices() {
   const [discountValue, setDiscountValue] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "deferred" | "partial">("cash");
   const [paidAmount, setPaidAmount] = useState(0);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState('');  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   
   // Item Search
   const [itemSearchText, setItemSearchText] = useState('');
@@ -327,6 +328,7 @@ export default function Invoices() {
       setPaidAmount(finalTotal);
     } else if (paymentMethod === 'deferred') {
       setPaidAmount(0);
+    setInvoiceDate(new Date().toISOString().split('T')[0]);
     }
   }, [paymentMethod, finalTotal]);
 
@@ -383,6 +385,7 @@ export default function Invoices() {
       setPaymentMethod('partial');
     }
     setPaidAmount(inv.paid);
+    setInvoiceDate(inv.date ? new Date(inv.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
     
     setViewMode('create');
   };
@@ -490,7 +493,7 @@ export default function Invoices() {
     try {
       const isEdit = !!(editingInvoiceId && activeInvoice);
       const invoicePayload: any = {
-        date: isEdit ? activeInvoice.date : new Date().toISOString(),
+        date: invoiceDate ? new Date(invoiceDate).toISOString() : new Date().toISOString(),
         customerId: targetCustomerId,
         items: mappedItems,
         total: finalTotal,
@@ -529,6 +532,7 @@ export default function Invoices() {
     setDiscountValue(0);
     setPaymentMethod('cash');
     setPaidAmount(0);
+    setInvoiceDate(new Date().toISOString().split('T')[0]);
     setItemSearchText('');
   };
 
@@ -651,6 +655,10 @@ export default function Invoices() {
                   </div>
 
                   <div className="space-y-1.5">
+                    <label className="text-xs sm:text-sm font-bold text-[#475569] block">تاريخ الفاتورة</label>
+                    <input type="date" required value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2180B2] focus:outline-none bg-white font-mono" dir="ltr" />
+                  </div>
+                  <div className="space-y-1.5">
                     <label className="text-xs sm:text-sm font-bold text-[#475569] block">اسم العميل</label>
                     {isQuote ? (
                       <input 
@@ -737,7 +745,7 @@ export default function Invoices() {
                   <div className="pt-4 border-t border-[#E2E8F0]">
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-bold text-[#475569]">المجموع الأولي:</span>
-                      <span className="font-bold text-lg">{subtotal.toLocaleString()} <span className="text-sm text-[#94A3B8]">ج.م</span></span>
+                      <span className="font-bold text-lg">{Number(subtotal || 0).toLocaleString()} <span className="text-sm text-[#94A3B8]">ج.م</span></span>
                     </div>
 
                     <div className="flex items-center justify-between mb-4 gap-2">
@@ -766,13 +774,13 @@ export default function Invoices() {
                           </span>
                           :
                         </span>
-                        <span className="font-mono" dir="ltr">-{discountAmount.toLocaleString()} ج.م</span>
+                        <span className="font-mono" dir="ltr">-{Number(discountAmount || 0).toLocaleString()} ج.م</span>
                       </div>
                     )}
 
                     <div className="flex justify-between items-center mt-6 pt-4 border-t border-[#E2E8F0]">
                       <span className="font-bold text-[#1E293B] text-lg sm:text-xl">الإجمالي النهائي:</span>
-                      <span className="font-bold text-xl sm:text-2xl text-[#2180B2]">{finalTotal.toLocaleString()} <span className="text-sm sm:text-base text-[#94A3B8]">ج.م</span></span>
+                      <span className="font-bold text-xl sm:text-2xl text-[#2180B2]">{Number(finalTotal || 0).toLocaleString()} <span className="text-sm sm:text-base text-[#94A3B8]">ج.م</span></span>
                     </div>
                   </div>
 
@@ -780,9 +788,9 @@ export default function Invoices() {
                     <div className="pt-4 space-y-3">
                       <label className="text-xs sm:text-sm font-bold text-[#475569]">طريقة الدفع للفاتورة:</label>
                       <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                        <button type="button" onClick={() => setPaymentMethod('cash')} className={`py-2 px-1 rounded-lg font-bold text-xs sm:text-sm border-none cursor-pointer truncate ${paymentMethod === 'cash' ? 'bg-[#16A34A] text-white' : 'bg-[#F1F5F9] text-[#475569]'}`}>نقدي كاش</button>
-                        <button type="button" onClick={() => setPaymentMethod('deferred')} className={`py-2 px-1 rounded-lg font-bold text-xs sm:text-sm border-none cursor-pointer truncate ${paymentMethod === 'deferred' ? 'bg-[#DC2626] text-white' : 'bg-[#F1F5F9] text-[#475569]'}`}>أجل بالكامل</button>
-                        <button type="button" onClick={() => setPaymentMethod('partial')} className={`py-2 px-1 rounded-lg font-bold text-xs sm:text-sm border-none cursor-pointer truncate ${paymentMethod === 'partial' ? 'bg-[#D97706] text-white' : 'bg-[#F1F5F9] text-[#475569]'}`}>جزئي / عربون</button>
+                        <button type="button" onClick={() => setPaymentMethod('cash')} className={`py-2 px-1 rounded-lg font-bold text-xs sm:text-sm border-none cursor-pointer truncate ${paymentMethod === 'cash' ? 'bg-[#16A34A] text-white' : 'bg-[#F1F5F9] text-[#475569]'}`}>نقدي</button>
+                        <button type="button" onClick={() => setPaymentMethod('deferred')} className={`py-2 px-1 rounded-lg font-bold text-xs sm:text-sm border-none cursor-pointer truncate ${paymentMethod === 'deferred' ? 'bg-[#DC2626] text-white' : 'bg-[#F1F5F9] text-[#475569]'}`}>آجل</button>
+                        <button type="button" onClick={() => setPaymentMethod('partial')} className={`py-2 px-1 rounded-lg font-bold text-xs sm:text-sm border-none cursor-pointer truncate ${paymentMethod === 'partial' ? 'bg-[#D97706] text-white' : 'bg-[#F1F5F9] text-[#475569]'}`}>جزئي</button>
                       </div>
 
                       {paymentMethod === 'partial' && (
@@ -872,7 +880,7 @@ export default function Invoices() {
                                  <p className="font-bold text-[#1E293B]">{item.name}</p>
                                  {showDetailsAndPrices && <p className="text-xs text-[#94A3B8]">كود: {item.code} | متاح: {item.quantity}</p>}
                                </div>
-                               {showDetailsAndPrices && <span className="font-bold text-[#2180B2]">{item.sellPrice.toLocaleString()} ج.م</span>}
+                               {showDetailsAndPrices && <span className="font-bold text-[#2180B2]">{Number(item.sellPrice || 0).toLocaleString()} ج.م</span>}
                              </button>
                            ))}
                          </div>
@@ -913,7 +921,12 @@ export default function Invoices() {
                             if (!invItem) return null;
                             const qtyTotal = item.price * item.qty;
                             return (
-                              <tr key={idx} className="hover:bg-[#F8FAFC] transition-colors">
+                              <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={`invoice-item-${idx}`} className="hover:bg-[#F8FAFC] transition-colors">
                                 <td className="py-3 px-4">
                                   <p className="font-bold text-[#1E293B]">{invItem.name}</p>
                                   {showDetailsAndPrices && <p className="text-xs text-[#94A3B8]">كود: {invItem.code}</p>}
@@ -950,7 +963,7 @@ export default function Invoices() {
                                     className="w-20 border border-[#E2E8F0] rounded-lg px-2 py-1 text-center font-bold focus:ring-2 focus:ring-[#2180B2] focus:outline-none"
                                   />
                                 </td>
-                                {showDetailsAndPrices && <td className="py-3 px-4 font-bold text-[#2180B2]">{qtyTotal.toLocaleString()}</td>}
+                                {showDetailsAndPrices && <td className="py-3 px-4 font-bold text-[#2180B2]">{Number(qtyTotal || 0).toLocaleString()}</td>}
                                 <td className="py-3 px-4 text-center">
                                   <button
                                     type="button" 
@@ -964,7 +977,7 @@ export default function Invoices() {
                                     <Trash2 className="w-5 h-5" />
                                   </button>
                                 </td>
-                              </tr>
+                              </motion.tr>
                             );
                           })}
                         </tbody>
@@ -1001,7 +1014,7 @@ export default function Invoices() {
                   لا توجد فواتير سابقة مسجلة
                 </div>
               ) : (
-                filteredInvoices.map((inv) => {
+                filteredInvoices.map((inv, idx) => {
                   const customer = customers.find(c => c.id === inv.customerId);
                   const isFullyPaid = inv.paid >= inv.total;
                   const customerName = inv.isQuote && inv.customCustomerName ? inv.customCustomerName : (customer?.name || 'عميل نقدي');
@@ -1009,7 +1022,7 @@ export default function Invoices() {
 
                   return (
                     <div 
-                      key={inv.id}
+                      key={inv.id ? `invoice-${inv.id}` : `invoice-idx-${idx}`}
                       className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 space-y-3 shadow-xs"
                     >
                       <div className="flex justify-between items-start gap-2">
@@ -1047,7 +1060,7 @@ export default function Invoices() {
                         <div className="text-left">
                           <span className="block text-[10px] text-slate-500 font-medium">الإجمالي</span>
                           <span className="font-black text-base text-[#1E293B] font-mono">
-                            {inv.total.toLocaleString()} <span className="text-[11px] font-normal">ج.م</span>
+                            {Number(inv.total || 0).toLocaleString()} <span className="text-[11px] font-normal">ج.م</span>
                           </span>
                         </div>
                       </div>
@@ -1057,12 +1070,12 @@ export default function Invoices() {
                         <div className="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg border border-[#E2E8F0] text-xs">
                           <div>
                             <span className="text-[#94A3B8] block text-[10px]">المدفوع:</span>
-                            <span className="font-bold text-[#16A34A] font-mono">{inv.paid.toLocaleString()} ج.م</span>
+                            <span className="font-bold text-[#16A34A] font-mono">{Number(inv.paid || 0).toLocaleString()} ج.م</span>
                           </div>
                           <div className="text-left">
                             <span className="text-[#94A3B8] block text-[10px]">المتبقي:</span>
                             <span className={`font-bold font-mono ${remaining > 0 ? 'text-[#DC2626]' : 'text-slate-600'}`}>
-                              {remaining.toLocaleString()} ج.م
+                              {Number(remaining || 0).toLocaleString()} ج.م
                             </span>
                           </div>
                         </div>
@@ -1122,20 +1135,25 @@ export default function Invoices() {
                        <td colSpan={7} className="px-6 py-8 text-center text-[#94A3B8]">لا توجد فواتير سابقة مسجلة</td>
                     </tr>
                   ) : (
-                    filteredInvoices.map((inv) => {
+                    filteredInvoices.map((inv, idx) => {
                       const customer = customers.find(c => c.id === inv.customerId);
                       const isFullyPaid = inv.paid >= inv.total;
                       const customerName = inv.isQuote && inv.customCustomerName ? inv.customCustomerName : (customer?.name || 'عميل نقدي');
                       return (
-                        <tr key={inv.id} className="hover:bg-[#F8FAFC]">
+                        <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={inv.id ? `invoice-${inv.id}` : `invoice-idx-${idx}`} className="hover:bg-[#F8FAFC]">
                           <td className="px-6 py-4 font-mono font-bold text-[#2180B2]">{inv.invoiceNumber}</td>
                           <td className="px-6 py-4 text-[#475569]">{new Date(inv.date).toLocaleDateString()}</td>
                           <td className="px-6 py-4 font-bold text-[#1E293B]">
                             {customerName}
                             {inv.isQuote && <span className="mr-2 text-[10px] bg-[#FEF3C7] text-[#D97706] px-1.5 py-0.5 rounded font-bold">عرض سعر</span>}
                           </td>
-                          <td className="px-6 py-4 font-bold">{inv.total.toLocaleString()}</td>
-                          <td className="px-6 py-4 text-[#16A34A]">{inv.isQuote ? '---' : inv.paid.toLocaleString()}</td>
+                          <td className="px-6 py-4 font-bold">{Number(inv.total || 0).toLocaleString()}</td>
+                          <td className="px-6 py-4 text-[#16A34A]">{inv.isQuote ? '---' : Number(inv.paid || 0).toLocaleString()}</td>
                           <td className="px-6 py-4">
                             {inv.isQuote ? (
                               <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#FFFBEB] text-[#D97706] whitespace-nowrap border border-[#FDE68A]">عرض سعر معتمد</span>
@@ -1173,7 +1191,7 @@ export default function Invoices() {
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </td>
-                        </tr>
+                        </motion.tr>
                       );
                     })
                   )}
@@ -1200,8 +1218,8 @@ export default function Invoices() {
             targetInvoiceToDelete ? (
               <div className="grid grid-cols-2 gap-2 mt-1 text-xs">
                 <div>النوع: {targetInvoiceToDelete.isQuote ? 'عرض سعر' : 'فاتورة بيع'}</div>
-                <div>الإجمالي: {targetInvoiceToDelete.total.toLocaleString()} ج.م</div>
-                <div>المدفوع: {targetInvoiceToDelete.paid.toLocaleString()} ج.م</div>
+                <div>الإجمالي: {Number(targetInvoiceToDelete.total || 0).toLocaleString()} ج.م</div>
+                <div>المدفوع: {Number(targetInvoiceToDelete.paid || 0).toLocaleString()} ج.م</div>
                 <div>عدد الأصناف: {targetInvoiceToDelete.items?.length || 0}</div>
               </div>
             ) : undefined

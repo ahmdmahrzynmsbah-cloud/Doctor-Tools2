@@ -884,7 +884,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       Object.entries(item).map(([k, v]) => [k, v === undefined ? '' : v])
     ) as Omit<InventoryItem, 'id'>;
     
-    const now = Date.now();
+    const now = (item as any).createdAt || Date.now();
     const newRef = doc(collection(db, 'users', uid, 'inventory'));
     const newId = newRef.id;
 
@@ -987,7 +987,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const addCustomer = useCallback(async (customer: Omit<Customer, 'id' | 'serialNumber'>): Promise<string> => {
     const serialNumber = `CUST-${1000 + customers.length + 1}`;
-    const now = Date.now();
+    const now = (customer as any).createdAt || Date.now();
     const newRef = doc(collection(db, 'users', uid, 'customers'));
     const newId = newRef.id;
 
@@ -1038,7 +1038,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [uid]);
 
   const addSupplier = useCallback(async (supplier: Omit<Supplier, 'id'>) => {
-    const now = Date.now();
+    const now = (supplier as any).createdAt || Date.now();
     const newRef = doc(collection(db, 'users', uid, 'suppliers'));
     const newId = newRef.id;
 

@@ -55,8 +55,8 @@ export default function AuditLog() {
               <p>لا توجد معاملات مسجلة حتى الآن</p>
             </div>
           ) : (
-            transactions.map((tx) => (
-              <div key={tx.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl hover:border-[#2563EB] transition-colors">
+            transactions.map((tx, idx) => (
+              <div key={tx.id ? `audit-${tx.id}` : `audit-idx-${idx}`} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl hover:border-[#2563EB] transition-colors">
                 <div className="flex items-start gap-4">
                   <div className={`mt-1 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 min-w-[40px] ${tx.type === 'sale' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'bg-[#FEF2F2] text-[#DC2626]'}`} dir="ltr">
                      {tx.type === 'sale' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
@@ -69,10 +69,10 @@ export default function AuditLog() {
                 </div>
                 
                 <div className="mt-4 sm:mt-0 text-right">
-                  <p className="text-sm text-[#475569] font-bold">الإجمالي: <span className="text-[#1E293B]" dir="ltr">{tx.total.toLocaleString()}</span> ج.م</p>
+                  <p className="text-sm text-[#475569] font-bold">الإجمالي: <span className="text-[#1E293B]" dir="ltr">{Number(tx.total || 0).toLocaleString()}</span> ج.م</p>
                   <p className="text-sm text-[#475569] font-bold mt-1">
                     المدفوع كاش: 
-                    <span className={tx.paid >= tx.total ? 'text-[#16A34A]' : (tx.paid === 0 ? 'text-[#DC2626]' : 'text-[#D97706]')} dir="ltr"> {tx.paid.toLocaleString()}</span> ج.م
+                    <span className={tx.paid >= tx.total ? 'text-[#16A34A]' : (tx.paid === 0 ? 'text-[#DC2626]' : 'text-[#D97706]')} dir="ltr"> {Number(tx.paid || 0).toLocaleString()}</span> ج.م
                   </p>
                 </div>
               </div>

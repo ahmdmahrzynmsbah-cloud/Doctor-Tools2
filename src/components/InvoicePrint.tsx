@@ -117,7 +117,7 @@ export default function InvoicePrint({ invoice, customer, inventory, profile }: 
                 const lineTotal = item.quantity * item.price;
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#F8FAFC';
                 return (
-                  <tr key={idx} className="hover:bg-[#F8FAFC] transition-colors duration-150 break-inside-avoid" style={{ backgroundColor: rowBg, borderBottom: '1px solid #E2E8F0' }}>
+                  <tr key={`invoice-print-item-${idx}`} className="hover:bg-[#F8FAFC] transition-colors duration-150 break-inside-avoid" style={{ backgroundColor: rowBg, borderBottom: '1px solid #E2E8F0' }}>
                     <td className="py-2.5 px-3 text-center font-mono font-bold text-[#64748B] text-xs sm:text-sm print:text-black" style={{ color: '#64748B', backgroundColor: rowBg, padding: '10px 12px' }}>{idx + 1}</td>
                     <td className="py-2.5 px-3 align-top text-right" style={{ backgroundColor: rowBg, padding: '10px 12px' }}>
                       <span className="font-bold text-[#0F172A] text-xs sm:text-sm" style={{ color: '#0F172A', fontWeight: 700 }}>
@@ -131,10 +131,10 @@ export default function InvoicePrint({ invoice, customer, inventory, profile }: 
                       )}
                     </td>
                     <td className="py-2.5 px-3 text-center font-mono font-extrabold text-[#334155] text-xs sm:text-sm print:text-black" style={{ color: '#334155', backgroundColor: rowBg, padding: '10px 12px' }}>{item.quantity}</td>
-                    <td className="py-2.5 px-3 text-center font-mono font-bold text-[#475569] text-xs sm:text-sm print:text-black" dir="ltr" style={{ color: '#475569', backgroundColor: rowBg, padding: '10px 12px' }}>{item.price.toLocaleString()}</td>
+                    <td className="py-2.5 px-3 text-center font-mono font-bold text-[#475569] text-xs sm:text-sm print:text-black" dir="ltr" style={{ color: '#475569', backgroundColor: rowBg, padding: '10px 12px' }}>{Number(item.price || 0).toLocaleString()}</td>
                     <td className="py-2.5 px-3 text-left font-mono font-extrabold text-[#0F172A] text-xs sm:text-sm print:text-black" style={{ color: '#0F172A', backgroundColor: rowBg, padding: '10px 12px' }}>
                       <div className="inline-flex items-center gap-1" dir="ltr" style={{ color: '#0F172A' }}>
-                        <span style={{ color: '#0F172A' }}>{lineTotal.toLocaleString()}</span>
+                        <span style={{ color: '#0F172A' }}>{Number(lineTotal || 0).toLocaleString()}</span>
                         <span dir="rtl" style={{ color: '#0F172A' }}>ج.م</span>
                       </div>
                     </td>
@@ -166,7 +166,7 @@ export default function InvoicePrint({ invoice, customer, inventory, profile }: 
               <div className="flex justify-between items-center text-[#475569] border-b border-[#E2E8F0] pb-1.5 text-xs font-semibold" style={{ display: 'flex', justifyContent: 'space-between', color: '#475569', borderBottom: '1px solid #E2E8F0', paddingBottom: '6px' }}>
                 <span>الإجمالي قبل الخصم:</span>
                 <div className="font-mono text-xs text-[#475569] inline-flex items-center gap-1" dir="ltr" style={{ color: '#475569' }}>
-                  <span>{subtotal.toLocaleString()}</span>
+                  <span>{Number(subtotal || 0).toLocaleString()}</span>
                   <span dir="rtl">ج.م</span>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function InvoicePrint({ invoice, customer, inventory, profile }: 
                   :
                 </span>
                 <div className="font-mono text-xs inline-flex items-center gap-1" dir="ltr" style={{ color: '#DC2626' }}>
-                  <span>-{discountAmount.toLocaleString()}</span>
+                  <span>-{Number(discountAmount || 0).toLocaleString()}</span>
                   <span dir="rtl">ج.م</span>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function InvoicePrint({ invoice, customer, inventory, profile }: 
             <div className="flex justify-between items-center text-[#1E293B] border-b border-[#E2E8F0] pb-1.5 text-xs font-bold" style={{ display: 'flex', justifyContent: 'space-between', color: '#1E293B', borderBottom: '1px solid #E2E8F0', paddingBottom: '6px' }}>
               <span>{invoice.isQuote ? (discountAmount > 0 ? 'إجمالي عرض السعر بعد الخصم:' : 'إجمالي عرض السعر:') : (discountAmount > 0 ? 'الإجمالي النهائي بعد الخصم:' : 'إجمالي الفاتورة:')}</span>
               <div className="font-mono text-sm sm:text-base font-black text-[#1E293B] inline-flex items-center gap-1" dir="ltr" style={{ color: '#1E293B', fontWeight: 900 }}>
-                <span>{invoice.total.toLocaleString()}</span>
+                <span>{Number(invoice.total || 0).toLocaleString()}</span>
                 <span dir="rtl">ج.م</span>
               </div>
             </div>
@@ -202,14 +202,14 @@ export default function InvoicePrint({ invoice, customer, inventory, profile }: 
                 <div className="flex justify-between items-center text-[#16A34A] border-b border-[#E2E8F0] pb-1.5 text-xs font-bold" style={{ display: 'flex', justifyContent: 'space-between', color: '#16A34A', borderBottom: '1px solid #E2E8F0', paddingBottom: '6px' }}>
                   <span>المبلغ المدفوع:</span>
                   <div className="font-mono text-xs sm:text-sm inline-flex items-center gap-1" dir="ltr" style={{ color: '#16A34A' }}>
-                    <span>{invoice.paid.toLocaleString()}</span>
+                    <span>{Number(invoice.paid || 0).toLocaleString()}</span>
                     <span dir="rtl">ج.م</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-0.5" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span className="text-xs font-black text-[#0F172A]" style={{ color: '#0F172A', fontWeight: 900 }}>المبلغ المتبقي:</span>
                   <div className={`font-mono text-sm sm:text-base font-black ${remaining > 0 ? 'text-[#DC2626]' : 'text-[#0D9488]'} inline-flex items-center gap-1`} dir="ltr" style={{ color: remaining > 0 ? '#DC2626' : '#0D9488', fontWeight: 900 }}>
-                    <span>{remaining.toLocaleString()}</span>
+                    <span>{Number(remaining || 0).toLocaleString()}</span>
                     <span dir="rtl">ج.م</span>
                   </div>
                 </div>

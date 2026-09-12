@@ -126,11 +126,11 @@ export default function ProductSearchSelect({
       {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-[#E2E8F0] rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-[#F1F5F9] transition-all dir-rtl">
           {filteredItems.length > 0 ? (
-            filteredItems.map((item) => {
+            filteredItems.map((item, idx) => {
               const isSelected = item.id === value;
               return (
                 <div
-                  key={item.id}
+                  key={item.id ? `product-search-${item.id}` : `product-search-idx-${idx}`}
                   onClick={() => handleSelect(item)}
                   className={`p-2.5 flex items-center justify-between cursor-pointer hover:bg-[#F0FDF4] transition-colors ${
                     isSelected ? 'bg-[#ECFDF5]' : ''
@@ -152,7 +152,7 @@ export default function ProductSearchSelect({
                       <div className="text-xs text-[#64748B] flex items-center gap-3 mt-0.5">
                         {item.brand && <span>الماركة: {item.brand}</span>}
                         <span>متوفر بالمخزن: <strong className={item.quantity > 0 ? 'text-[#059669]' : 'text-[#DC2626]'}>{item.quantity}</strong></span>
-                        {item.purchasePrice > 0 && <span>آخر تكلفة: {item.purchasePrice.toLocaleString()} ج.م</span>}
+                        {item.purchasePrice > 0 && <span>آخر تكلفة: {Number(item.purchasePrice || 0).toLocaleString()} ج.م</span>}
                       </div>
                     </div>
                   </div>

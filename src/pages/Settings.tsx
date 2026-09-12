@@ -157,10 +157,10 @@ export default function Settings() {
       <div className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col md:flex-row overflow-hidden">
         
         {/* Sidebar for settings tabs */}
-        <div className="w-full md:w-64 bg-[#F8FAFC] border-b md:border-b-0 md:border-l border-[#E2E8F0] p-3 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto">
+        <div className="w-full md:w-72 lg:w-80 shrink-0 bg-[#F8FAFC] border-b md:border-b-0 md:border-l border-[#E2E8F0] p-3 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto">
           <button 
             onClick={() => setActiveTab('profile')}
-            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'profile' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
+            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-normal md:whitespace-nowrap lg:whitespace-normal text-right ${activeTab === 'profile' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
           >
             <Store className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
             <span>بيانات النظام</span>
@@ -168,7 +168,7 @@ export default function Settings() {
           
           <button 
             onClick={() => setActiveTab('appearance')}
-            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'appearance' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
+            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-normal md:whitespace-nowrap lg:whitespace-normal text-right ${activeTab === 'appearance' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
           >
             <Moon className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
             <span>المظهر والوضع الداكن</span>
@@ -176,7 +176,7 @@ export default function Settings() {
 
           <button 
             onClick={() => setActiveTab('security')}
-            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'security' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
+            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-normal md:whitespace-nowrap lg:whitespace-normal text-right ${activeTab === 'security' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
           >
             <Lock className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
             <span>تغيير كلمة المرور</span>
@@ -184,7 +184,7 @@ export default function Settings() {
 
           <button 
             onClick={() => setActiveTab('backup')}
-            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-nowrap ${activeTab === 'backup' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
+            className={`flex-1 md:flex-initial md:w-full flex items-center gap-2.5 px-4 py-2.5 md:py-3 rounded-lg text-xs md:text-sm font-bold transition-colors cursor-pointer whitespace-normal md:whitespace-nowrap lg:whitespace-normal text-right ${activeTab === 'backup' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#475569] hover:bg-[#E2E8F0]'}`}
           >
             <Database className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
             <span>النسخ الاحتياطي واستعادة البيانات</span>
@@ -348,7 +348,7 @@ export default function Settings() {
                       type="text" required
                       value={profile.businessName}
                       onChange={e => setProfile({...profile, businessName: e.target.value})}
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto" 
                     />
                   </div>
                   
@@ -359,8 +359,7 @@ export default function Settings() {
                       value={profile.phone}
                       onChange={e => setProfile({...profile, phone: e.target.value})}
                       placeholder="أدخل رقم الهاتف أو اتركه فارغاً..."
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
-                      dir="ltr"
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto"
                     />
                   </div>
                   
@@ -370,7 +369,7 @@ export default function Settings() {
                       type="text" required
                       value={profile.address}
                       onChange={e => setProfile({...profile, address: e.target.value})}
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto" 
                     />
                   </div>
 
@@ -380,7 +379,7 @@ export default function Settings() {
                       type="text" required
                       value={profile.description}
                       onChange={e => setProfile({...profile, description: e.target.value})}
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto" 
                     />
                   </div>
 
@@ -446,8 +445,7 @@ export default function Settings() {
                       type="password" required
                       value={security.currentPassword}
                       onChange={e => setSecurity({...security, currentPassword: e.target.value})}
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
-                      dir="ltr"
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto"
                     />
                   </div>
                   
@@ -457,8 +455,7 @@ export default function Settings() {
                       type="password" required minLength={6}
                       value={security.newPassword}
                       onChange={e => setSecurity({...security, newPassword: e.target.value})}
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
-                      dir="ltr"
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto"
                     />
                   </div>
                   
@@ -468,8 +465,7 @@ export default function Settings() {
                       type="password" required minLength={6}
                       value={security.confirmPassword}
                       onChange={e => setSecurity({...security, confirmPassword: e.target.value})}
-                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" 
-                      dir="ltr"
+                      className="w-full border border-[#E2E8F0] rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none text-right" dir="auto"
                     />
                   </div>
 

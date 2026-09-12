@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'motion/react';
 import React, { useMemo } from 'react';
 import { useAppData } from '@/src/context/AppDataContext';
 import { Package, FileText, ArrowUpRight, TrendingDown, Wallet, CreditCard, AlertTriangle, ArrowLeft, Database, CheckCircle2, X } from 'lucide-react';
@@ -208,7 +209,7 @@ export default function Dashboard() {
                   لا توجد فواتير صادرة مؤخراً.
                 </div>
               ) : (
-                recentInvoices.map((inv) => {
+                recentInvoices.map((inv, idx) => {
                   const customerName = inv.customCustomerName || customerMap.get(inv.customerId) || 'عميل نقدي';
                   const isFullyPaid = inv.paid >= inv.total;
                   const isPartiallyPaid = inv.paid > 0 && inv.paid < inv.total;
@@ -217,7 +218,7 @@ export default function Dashboard() {
 
                   return (
                     <div 
-                      key={inv.id}
+                      key={inv.id ? `recent-inv-${inv.id}` : `recent-inv-idx-${idx}`}
                       className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 flex items-center justify-between gap-2"
                     >
                       <div className="min-w-0">
@@ -243,7 +244,7 @@ export default function Dashboard() {
 
                       <div className="text-left shrink-0">
                         <span className="font-black text-sm text-[#1E293B] font-mono block">
-                          {inv.total.toLocaleString()} <span className="text-[10px] font-normal text-[#94A3B8]">ج.م</span>
+                          {Number(inv.total || 0).toLocaleString()} <span className="text-[10px] font-normal text-[#94A3B8]">ج.م</span>
                         </span>
                         <Link 
                           to="/invoices" 
@@ -271,7 +272,7 @@ export default function Dashboard() {
                      </tr>
                   </thead>
                    <tbody className="divide-y divide-[#F1F5F9]">
-                     {recentInvoices.map((inv) => {
+                     {recentInvoices.map((inv, idx) => {
                        const customerName = inv.customCustomerName || customerMap.get(inv.customerId) || 'عميل نقدي';
                        const isFullyPaid = inv.paid >= inv.total;
                        const isPartiallyPaid = inv.paid > 0 && inv.paid < inv.total;
@@ -280,7 +281,12 @@ export default function Dashboard() {
                        const formattedDate = `${dateStr.getHours().toString().padStart(2, '0')}:${dateStr.getMinutes().toString().padStart(2, '0')} ${dateStr.getDate().toString().padStart(2, '0')}/${(dateStr.getMonth()+1).toString().padStart(2, '0')}/${dateStr.getFullYear()}`;
 
                        return (
-                         <tr key={inv.id} className="hover:bg-[#F8FAFC] transition-colors">
+                         <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={inv.id ? `recent-inv-${inv.id}` : `recent-inv-idx-${idx}`} className="hover:bg-[#F8FAFC] transition-colors">
                            <td className="py-4 px-6 font-bold text-[#1E293B]">SA-{inv.invoiceNumber}</td>
                            <td className="py-4 px-6 font-bold text-[#1E293B]">{customerName}</td>
                            <td className="py-4 px-6 text-[#94A3B8] font-mono text-right" dir="ltr">{formattedDate}</td>
@@ -294,7 +300,7 @@ export default function Dashboard() {
                              )}
                            </td>
                            <td className="py-4 px-6 font-black text-[#1E293B] text-left">{inv.total} <span className="text-xs font-bold text-[#94A3B8]">ج.م</span></td>
-                         </tr>
+                         </motion.tr>
                        );
                      })}
                      {recentInvoices.length === 0 && (

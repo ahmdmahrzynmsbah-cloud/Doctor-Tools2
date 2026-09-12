@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, Filter, Search, Edit, Trash2, X, PackageOpen, LayoutGrid, Eye, Printer, MapPin, ScanLine } from 'lucide-react';
 import { useAppData, InventoryItem } from '@/src/context/AppDataContext';
@@ -30,8 +31,9 @@ export default function Inventory() {
     quantity: number | string;
     purchasePrice: number | string;
     sellPrice: number | string;
+    date: string;
   }>({
-    code: '', name: '', brand: '', compatibleCars: '', category: '', storageLocation: '', quantity: '', purchasePrice: '', sellPrice: ''
+    code: '', name: '', brand: '', compatibleCars: '', category: '', storageLocation: '', quantity: '', purchasePrice: '', sellPrice: '', date: new Date().toISOString().split('T')[0]
   });
 
   const [newCatName, setNewCatName] = useState('');
@@ -94,7 +96,7 @@ export default function Inventory() {
       storageLocation: '',
       quantity: '',
       purchasePrice: '',
-      sellPrice: ''
+      sellPrice: '', date: new Date().toISOString().split('T')[0]
     });
     setError('');
     setIsModalOpen(true);
@@ -107,7 +109,7 @@ export default function Inventory() {
       ...item,
       quantity: item.quantity === 0 ? '' : item.quantity,
       purchasePrice: item.purchasePrice === 0 ? '' : item.purchasePrice,
-      sellPrice: item.sellPrice === 0 ? '' : item.sellPrice,
+      sellPrice: item.sellPrice === 0 ? '' : item.sellPrice, date: item.createdAt ? new Date(item.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     });
     setError('');
     setIsModalOpen(true);
@@ -170,6 +172,7 @@ export default function Inventory() {
       quantity: Number(formData.quantity) || 0,
       purchasePrice: Number(formData.purchasePrice) || 0,
       sellPrice: Number(formData.sellPrice) || 0,
+      createdAt: formData.date ? new Date(formData.date).getTime() : Date.now(),
     };
 
     try {
@@ -294,9 +297,9 @@ export default function Inventory() {
               <p className="font-bold">لا توجد منتجات مطابقة للبحث</p>
             </div>
           ) : (
-            filteredInventory.map((item) => (
+            filteredInventory.map((item, idx) => (
               <div 
-                key={item.id}
+                key={item.id ? `inventory-${item.id}` : `inventory-idx-${idx}`}
                 className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 space-y-3 transition-shadow hover:shadow-sm"
               >
                 <div className="flex justify-between items-start gap-2">
@@ -412,8 +415,13 @@ export default function Inventory() {
                   </td>
                 </tr>
               ) : (
-                filteredInventory.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#F8FAFC]">
+                filteredInventory.map((item, idx) => (
+                  <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={item.id ? `inventory-${item.id}` : `inventory-idx-${idx}`} className="hover:bg-[#F8FAFC]">
                     <td className="px-6 py-4 font-mono font-bold text-[#1E293B]">{item.code}</td>
                     <td className="px-6 py-4">
                       <p className="font-bold text-[#1E293B] text-base">{item.name}</p>
@@ -448,7 +456,7 @@ export default function Inventory() {
                          <button onClick={() => setItemToDelete(item)} className="hover:text-[#DC2626] transition-colors cursor-pointer bg-transparent border-none" title="حذف الصنف"><Trash2 className="w-5 h-5"/></button>
                        </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
@@ -479,6 +487,10 @@ export default function Inventory() {
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-[#475569]">رمز الباركود / الكود</label>
                   <input type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full border border-[#E2E8F0] rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-[#2180B2] focus:outline-none bg-[#F8FAFC]" dir="ltr" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-bold text-[#475569]">التاريخ</label>
+                  <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full border border-[#E2E8F0] rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-[#2180B2] focus:outline-none bg-[#F8FAFC]" dir="ltr" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-bold text-[#475569]">الكمية الحالية</label>

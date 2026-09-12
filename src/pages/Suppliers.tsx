@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, X, Factory, ArrowDownToLine, ShoppingCart, History, Edit2, Trash2, Banknote, Printer, Share2, Loader2, MessageCircle } from 'lucide-react';
 import { useAppData, Supplier } from '@/src/context/AppDataContext';
@@ -18,7 +19,7 @@ export default function Suppliers() {
 
   const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
   const [purchaseItems, setPurchaseItems] = useState<{inventoryId: string; isNew: boolean; newName: string; newSellPrice: number; qty: number; cost: number;}[]>([{ inventoryId: '', isNew: false, newName: '', newSellPrice: 0, qty: 1, cost: 0 }]);
-  const [paidAmount, setPaidAmount] = useState(0);
+  const [paidAmount, setPaidAmount] = useState(0);  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
 
   const [selectedSupplierHistory, setSelectedSupplierHistory] = useState<Supplier | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -28,8 +29,9 @@ export default function Suppliers() {
     name: string;
     phone: string;
     balance: number | string;
+    date: string;
   }>({
-    name: '', phone: '', balance: ''
+    name: '', phone: '', balance: '', date: new Date().toISOString().split('T')[0]
   });
 
   const getSupplierPurchases = (supplierId: string) => {
@@ -89,8 +91,8 @@ export default function Suppliers() {
         const itemDetails = inv.items.map(item => {
           const inventoryItem = inventory.find(i => i.id === item.itemId);
           const name = inventoryItem ? inventoryItem.name : 'صنف محذوف';
-          const itemPrice = item.price ?? item.unitPrice ?? 0;
-          const totalItemPrice = (item.quantity * itemPrice).toLocaleString();
+          const itemPrice = (item as any).price ?? (item as any).unitPrice ?? 0;
+          const totalItemPrice = Number((item.quantity || 0) * (itemPrice || 0)).toLocaleString();
           return `${name} (العدد: ${item.quantity} | السعر الكلي: ${totalItemPrice} ج.م)`;
         });
         purchaseDetails = ` - أصناف: ${itemDetails.join('، ')}`;
@@ -245,6 +247,7 @@ export default function Suppliers() {
       name: newSupplier.name,
       phone: newSupplier.phone,
       balance: Number(newSupplier.balance) || 0,
+      createdAt: newSupplier.date ? new Date(newSupplier.date).getTime() : Date.now(),
     };
     if (editingSupplier) {
       updateSupplier(editingSupplier.id, payload);
@@ -257,7 +260,7 @@ export default function Suppliers() {
   const closeSupplierModal = () => {
     setIsAddSupplierModalOpen(false);
     setEditingSupplier(null);
-    setNewSupplier({ name: '', phone: '', balance: '' });
+    setNewSupplier({ name: '', phone: '', balance: '', date: new Date().toISOString().split('T')[0] });
   };
 
   const openEditSupplierModal = (supplier: Supplier) => {
@@ -265,7 +268,8 @@ export default function Suppliers() {
     setNewSupplier({
       name: supplier.name,
       phone: supplier.phone,
-      balance: supplier.balance === 0 ? '' : supplier.balance
+      balance: supplier.balance === 0 ? '' : supplier.balance,
+      date: supplier.createdAt ? new Date(supplier.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setIsAddSupplierModalOpen(true);
   };
@@ -312,17 +316,17 @@ export default function Suppliers() {
         const invItem = inventory.find(i => i.id === item.itemId);
         const qty = item.quantity || 0;
         const price = item.price ?? item.unitPrice ?? 0;
-        text += `${idx + 1}- ${invItem ? invItem.name : 'صنف محذوف'} | ${qty} x ${price.toLocaleString()} = ${(qty * price).toLocaleString()} ج.م\n`;
+        text += `${idx + 1}- ${invItem ? invItem.name : 'صنف محذوف'} | ${qty} x ${Number(price || 0).toLocaleString()} = ${Number((qty || 0) * (price || 0)).toLocaleString()} ج.م\n`;
       });
       
       const total = purchase.total || 0;
       const paid = purchase.paid || 0;
       
-      text += `\n*الإجمالي النهائي:* ${total.toLocaleString()} ج.م\n`;
-      text += `*المدفوع:* ${paid.toLocaleString()} ج.م\n`;
+      text += `\n*الإجمالي النهائي:* ${Number(total || 0).toLocaleString()} ج.م\n`;
+      text += `*المدفوع:* ${Number(paid || 0).toLocaleString()} ج.م\n`;
       
       if (total - paid > 0) {
-        text += `*المتبقي:* ${(total - paid).toLocaleString()} ج.م\n`;
+        text += `*المتبقي:* ${Number((total || 0) - (paid || 0)).toLocaleString()} ج.م\n`;
       }
       text += `\nشكراً لك! - ${businessProfile?.name || 'الشركة'}`;
 
@@ -476,7 +480,7 @@ export default function Suppliers() {
     }
 
     await createPurchase({
-      date: new Date().toISOString(),
+      date: purchaseDate ? new Date(purchaseDate).toISOString() : new Date().toISOString(),
       supplierId: selectedSupplierId,
       items: finalItems,
       total,
@@ -487,6 +491,7 @@ export default function Suppliers() {
     setPurchaseItems([{ inventoryId: '', isNew: false, newName: '', newSellPrice: 0, qty: 1, cost: 0 }]);
     setSelectedSupplierId('');
     setPaidAmount(0);
+    setPurchaseDate(new Date().toISOString().split('T')[0]);
   };
 
   return (
@@ -508,7 +513,7 @@ export default function Suppliers() {
           <button 
             onClick={() => {
               setEditingSupplier(null);
-              setNewSupplier({ name: '', phone: '', balance: 0 });
+              setNewSupplier({ name: '', phone: '', balance: '', date: new Date().toISOString().split('T')[0] });
               setIsAddSupplierModalOpen(true);
             }}
             className="inline-flex items-center justify-center gap-2 rounded-md bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] cursor-pointer"
@@ -542,9 +547,9 @@ export default function Suppliers() {
               لا يوجد موردين مطابقين للبحث
             </div>
           ) : (
-            filteredSuppliers.map((supplier) => (
+            filteredSuppliers.map((supplier, idx) => (
               <div 
-                key={supplier.id}
+                key={supplier.id ? `supplier-${supplier.id}` : `supplier-idx-${idx}`}
                 className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 space-y-3 shadow-xs"
               >
                 <div className="flex justify-between items-start gap-2">
@@ -572,13 +577,13 @@ export default function Suppliers() {
 
                   <div className="text-left">
                     <span className="block text-[10px] text-slate-500 font-medium">الرصيد المستحق</span>
-                    <span className={`font-black text-base font-mono ${supplier.balance > 0 ? 'text-[#DC2626]' : supplier.balance < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'}`}>
-                      {Math.abs(supplier.balance).toLocaleString()} <span className="text-[11px] font-normal">ج.م</span>
+                    <span className={`font-black text-base font-mono ${Number(supplier.balance || 0) > 0 ? 'text-[#DC2626]' : Number(supplier.balance || 0) < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'}`}>
+                      {Math.abs(Number(supplier.balance || 0)).toLocaleString()} <span className="text-[11px] font-normal">ج.م</span>
                     </span>
                     <div className="mt-0.5">
-                      {supplier.balance > 0 && <span className="text-[10px] font-bold text-[#DC2626] bg-red-50 px-1.5 py-0.5 rounded">مطلوب للمورد</span>}
-                      {supplier.balance < 0 && <span className="text-[10px] font-bold text-[#16A34A] bg-emerald-50 px-1.5 py-0.5 rounded">دائن للمحل</span>}
-                      {supplier.balance === 0 && <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">خالص</span>}
+                      {Number(supplier.balance || 0) > 0 && <span className="text-[10px] font-bold text-[#DC2626] bg-red-50 px-1.5 py-0.5 rounded">مطلوب للمورد</span>}
+                      {Number(supplier.balance || 0) < 0 && <span className="text-[10px] font-bold text-[#16A34A] bg-emerald-50 px-1.5 py-0.5 rounded">دائن للمحل</span>}
+                      {Number(supplier.balance || 0) === 0 && <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">خالص</span>}
                     </div>
                   </div>
                 </div>
@@ -662,8 +667,13 @@ export default function Suppliers() {
                   </td>
                 </tr>
               ) : (
-                filteredSuppliers.map((supplier) => (
-                  <tr key={supplier.id} className="hover:bg-[#F8FAFC]">
+                filteredSuppliers.map((supplier, idx) => (
+                  <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={supplier.id ? `supplier-${supplier.id}` : `supplier-idx-${idx}`} className="hover:bg-[#F8FAFC]">
                     <td className="px-6 py-4 font-bold text-[#1E293B]">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#E2E8F0] flex items-center justify-center text-[#475569]">
@@ -674,14 +684,14 @@ export default function Suppliers() {
                     </td>
                     <td className="px-6 py-4 font-mono text-[#475569]">{supplier.phone}</td>
                     <td className="px-6 py-4 font-bold" dir="ltr">
-                      <span className={supplier.balance > 0 ? 'text-[#DC2626]' : supplier.balance < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'}>
-                        {Math.abs(supplier.balance).toLocaleString()}
+                      <span className={Number(supplier.balance || 0) > 0 ? 'text-[#DC2626]' : Number(supplier.balance || 0) < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'}>
+                        {Math.abs(Number(supplier.balance || 0)).toLocaleString()}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      {supplier.balance > 0 && <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] whitespace-nowrap">مطلوب تسديده للمورد</span>}
-                      {supplier.balance < 0 && <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#F0FDF4] text-[#16A34A] whitespace-nowrap">الورشة دائنة للمورد</span>}
-                      {supplier.balance === 0 && <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0] whitespace-nowrap">خالص</span>}
+                      {Number(supplier.balance || 0) > 0 && <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] whitespace-nowrap">مطلوب تسديده للمورد</span>}
+                      {Number(supplier.balance || 0) < 0 && <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#F0FDF4] text-[#16A34A] whitespace-nowrap">الورشة دائنة للمورد</span>}
+                      {Number(supplier.balance || 0) === 0 && <span className="px-2 py-1 rounded-md text-[11px] font-bold bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0] whitespace-nowrap">خالص</span>}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
@@ -737,7 +747,7 @@ export default function Suppliers() {
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
@@ -809,11 +819,11 @@ export default function Suppliers() {
                 </div>
                 <div className="text-left bg-white px-5 py-3 rounded-xl shadow-sm border border-[#E2E8F0] w-full sm:w-auto print:shadow-none print:px-4">
                   <p className="text-xs text-[#475569] font-bold mb-1 block">الرصيد المالي الحالي</p>
-                  <p className={`text-2xl font-black ${selectedSupplierHistory.balance > 0 ? 'text-[#DC2626]' : selectedSupplierHistory.balance < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'} print:text-black font-mono`} dir="ltr">
-                    {Math.abs(selectedSupplierHistory.balance).toLocaleString()} <span className="text-xs text-[#94A3B8] print:text-black">ج.م</span>
+                  <p className={`text-2xl font-black ${Number(selectedSupplierHistory.balance || 0) > 0 ? 'text-[#DC2626]' : Number(selectedSupplierHistory.balance || 0) < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'} print:text-black font-mono`} dir="ltr">
+                    {Math.abs(Number(selectedSupplierHistory.balance || 0)).toLocaleString()} <span className="text-xs text-[#94A3B8] print:text-black">ج.م</span>
                   </p>
                   <p className="text-[11px] text-[#64748B] mt-0.5 text-center font-bold print:text-black">
-                    {selectedSupplierHistory.balance > 0 ? 'مطلوب تسديده للمورد' : selectedSupplierHistory.balance < 0 ? 'رصيد دائن للمحل' : 'حساب خالص غير مدين'}
+                    {Number(selectedSupplierHistory.balance || 0) > 0 ? 'مطلوب تسديده للمورد' : Number(selectedSupplierHistory.balance || 0) < 0 ? 'رصيد دائن للمحل' : 'حساب خالص غير مدين'}
                   </p>
                 </div>
               </div>
@@ -833,18 +843,23 @@ export default function Suppliers() {
                   <tbody className="divide-y divide-[#E2E8F0]">
                     {ledgerEntries.length > 0 ? (
                       ledgerEntries.map((row: any, idx) => (
-                        <tr key={`${row.id}-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
+                        <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={row.id ? `row-${row.id}-${idx}` : `row-idx-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#475569] font-mono whitespace-nowrap print:text-black">{row.date}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#1E293B] font-bold print:text-black">{row.description}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center text-[#DC2626] font-bold print:text-black font-mono" dir="ltr">
-                            {row.credit > 0 ? row.credit.toLocaleString() : '-'}
+                            {row.credit > 0 ? Number(row.credit || 0).toLocaleString() : '-'}
                           </td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center text-[#16A34A] font-bold print:text-black font-mono" dir="ltr">
-                            {row.debit > 0 ? row.debit.toLocaleString() : '-'}
+                            {row.debit > 0 ? Number(row.debit || 0).toLocaleString() : '-'}
                           </td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center font-bold print:text-black font-mono" dir="ltr">
                             <span className={row.balance > 0 ? 'text-[#DC2626] print:text-black' : row.balance < 0 ? 'text-[#16A34A] print:text-black' : 'text-[#64748B] print:text-black'}>
-                              {Math.abs(row.balance).toLocaleString()} {row.balance > 0 ? 'دائن' : row.balance < 0 ? 'مدين' : ''}
+                              {Math.abs(Number(row.balance || 0)).toLocaleString()} {row.balance > 0 ? 'دائن' : row.balance < 0 ? 'مدين' : ''}
                             </span>
                           </td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center print:hidden">
@@ -864,7 +879,7 @@ export default function Suppliers() {
                                   } else if (!phone.startsWith('2')) {
                                     phone = '2' + phone;
                                   }
-                                  const textMsg = `مرحباً،\nمرفق تفاصيل فاتورة المشتريات رقم: ${row.rawPurchase.id.slice(-6).toUpperCase()}\nبتاريخ: ${new Date(row.rawPurchase.date).toLocaleDateString('ar-EG')}\nالإجمالي: ${row.rawPurchase.total.toLocaleString()} ج.م\nالمدفوع: ${row.rawPurchase.paid.toLocaleString()} ج.م\nالمتبقي: ${(row.rawPurchase.total - row.rawPurchase.paid).toLocaleString()} ج.م`;
+                                  const textMsg = `مرحباً،\nمرفق تفاصيل فاتورة المشتريات رقم: ${row.rawPurchase.id.slice(-6).toUpperCase()}\nبتاريخ: ${new Date(row.rawPurchase.date).toLocaleDateString('ar-EG')}\nالإجمالي: ${Number(row.rawPurchase.total || 0).toLocaleString()} ج.م\nالمدفوع: ${Number(row.rawPurchase.paid || 0).toLocaleString()} ج.م\nالمتبقي: ${Number((row.rawPurchase.total || 0) - (row.rawPurchase.paid || 0)).toLocaleString()} ج.م`;
                                   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(textMsg)}`, '_blank');
                                 }}
                                 className="inline-block text-[#16A34A] hover:text-[#15803D] transition-colors p-1 cursor-pointer bg-transparent border-none"
@@ -874,7 +889,7 @@ export default function Suppliers() {
                               </button>
                             )}
                           </td>
-                        </tr>
+                        </motion.tr>
                       ))
                     ) : (
                       <tr>
@@ -913,6 +928,10 @@ export default function Suppliers() {
                 <input type="tel" value={newSupplier.phone} onChange={e => setNewSupplier({...newSupplier, phone: e.target.value})} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" dir="ltr" />
               </div>
               <div className="space-y-1">
+                <label className="text-xs font-bold text-[#475569]">التاريخ</label>
+                <input type="date" value={newSupplier.date} onChange={e => setNewSupplier({...newSupplier, date: e.target.value})} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" dir="ltr" />
+              </div>
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#475569]">الرصيد الافتتاحي (ج.م)</label>
                 <input 
                   type="number" 
@@ -946,23 +965,29 @@ export default function Suppliers() {
             
             <form onSubmit={handleCreatePurchase} className="p-6 overflow-y-auto space-y-6">
               
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-[#475569]">المورد</label>
-                <select required value={selectedSupplierId} onChange={e => setSelectedSupplierId(e.target.value)} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#10B981] focus:outline-none bg-white">
-                  <option key="default-empty-supplier" value="">-- اختر المورد --</option>
-                  {suppliers.map((s, idx) => (
-                    <option key={s.id ? `supplier-${s.id}-${idx}` : `supplier-idx-${idx}`} value={s.id || ''}>
-                      {s.name} ({s.phone})
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#475569]">المورد</label>
+                  <select required value={selectedSupplierId} onChange={e => setSelectedSupplierId(e.target.value)} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#10B981] focus:outline-none bg-white">
+                    <option key="default-empty-supplier" value="">-- اختر المورد --</option>
+                    {suppliers.map((s, idx) => (
+                      <option key={s.id ? `supplier-${s.id}-${idx}` : `supplier-idx-${idx}`} value={s.id || ''}>
+                        {s.name} ({s.phone})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#475569]">تاريخ الفاتورة</label>
+                  <input type="date" required value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#10B981] focus:outline-none" dir="ltr" />
+                </div>
               </div>
 
               <div>
                 <h4 className="font-bold text-sm text-[#1E293B] mb-3">تفاصيل البضاعة الواردة (تُضاف للمخزون فوراً)</h4>
                 <div className="space-y-3">
                   {purchaseItems.map((item, idx) => (
-                    <div key={idx} className="flex flex-col gap-2 bg-[#F1F5F9] p-3 rounded-lg border border-[#E2E8F0]">
+                    <div key={`purchase-item-${idx}`} className="flex flex-col gap-2 bg-[#F1F5F9] p-3 rounded-lg border border-[#E2E8F0]">
                        <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-[#64748B]">الصنف #{idx + 1}</span>
                           <div className="flex items-center gap-3">
@@ -1068,7 +1093,7 @@ export default function Suppliers() {
               <div className="bg-[#F8FAFC] p-4 rounded-lg border border-[#E2E8F0]">
                 <div className="flex items-center justify-between font-bold text-[#1E293B] text-lg">
                   <span>إجمالي التكلفة:</span>
-                  <span>{purchaseItems.reduce((sum, item) => sum + (item.qty * item.cost), 0).toLocaleString()} <span className="text-sm">ج.م</span></span>
+                  <span>{Number(purchaseItems.reduce((sum, item) => sum + ((item.qty || 0) * (item.cost || 0)), 0)).toLocaleString()} <span className="text-sm">ج.م</span></span>
                 </div>
                 <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
                    <label className="text-xs font-bold text-[#475569] block mb-1">المبلغ المدفوع كاش للمورد (ج.م)</label>
@@ -1107,7 +1132,7 @@ export default function Suppliers() {
             <form onSubmit={handlePaymentSupplier} className="p-5 space-y-4">
               <div className="bg-[#EFF6FF] p-3 rounded-lg border border-[#BFDBFE]">
                 <p className="text-xs text-[#1D4ED8] font-bold mb-1">المورد: {paymentSupplier.name}</p>
-                <p className="text-sm text-[#1E3A8A] font-bold">المطلوب سداده: <span className="text-xl inline-block mr-1">{paymentSupplier.balance.toLocaleString()}</span> ج.م</p>
+                <p className="text-sm text-[#1E3A8A] font-bold">المطلوب سداده: <span className="text-xl inline-block mr-1">{Number(paymentSupplier.balance || 0).toLocaleString()}</span> ج.م</p>
               </div>
 
               <div className="space-y-1 mt-4">
@@ -1221,16 +1246,21 @@ export default function Suppliers() {
                       const invItem = inventory.find(i => i.id === item.itemId);
                       const unitPrice = item.price ?? item.unitPrice ?? 0;
                       return (
-                        <tr key={idx}>
+                        <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={`purchase-item-${idx}`}>
                           <td className="py-4 px-4 text-sm text-[#64748B] font-bold print:text-black">{idx + 1}</td>
                           <td className="py-4 px-4 print:text-black">
                             <span className="font-bold text-[#1E293B] block">{invItem ? invItem.name : 'صنف محذوف'}</span>
                             {invItem && <span className="text-xs text-[#94A3B8] mt-1 font-mono">{invItem.code}</span>}
                           </td>
                           <td className="py-4 px-4 text-sm text-center font-bold text-[#475569] print:text-black" dir="ltr">{item.quantity}</td>
-                          <td className="py-4 px-4 text-sm text-center font-bold text-[#475569] print:text-black" dir="ltr">{unitPrice.toLocaleString()}</td>
-                          <td className="py-4 px-4 text-sm font-bold text-[#1E293B] text-left print:text-black" dir="ltr">{(item.quantity * unitPrice).toLocaleString()} ج.م</td>
-                        </tr>
+                          <td className="py-4 px-4 text-sm text-center font-bold text-[#475569] print:text-black" dir="ltr">{Number(unitPrice || 0).toLocaleString()}</td>
+                          <td className="py-4 px-4 text-sm font-bold text-[#1E293B] text-left print:text-black" dir="ltr">{Number((item.quantity || 0) * (unitPrice || 0)).toLocaleString()} ج.م</td>
+                        </motion.tr>
                       );
                     })}
                   </tbody>
@@ -1241,16 +1271,16 @@ export default function Suppliers() {
                 <div className="w-full max-w-sm space-y-3">
                   <div className="flex justify-between items-center text-lg">
                     <span className="font-bold text-[#475569] print:text-black">الإجمالي النهائي:</span>
-                    <span className="font-bold text-2xl text-[#1E293B] print:text-black" dir="ltr">{printingPurchase.total.toLocaleString()} <span className="text-sm">ج.م</span></span>
+                    <span className="font-bold text-2xl text-[#1E293B] print:text-black" dir="ltr">{Number(printingPurchase.total || 0).toLocaleString()} <span className="text-sm">ج.م</span></span>
                   </div>
                   <div className="flex justify-between items-center text-sm pt-3 border-t border-[#E2E8F0] print:border-black/20">
                     <span className="font-bold text-[#16A34A] print:text-black">المبلغ المدفوع:</span>
-                    <span className="font-bold text-[#16A34A] print:text-black" dir="ltr">{printingPurchase.paid.toLocaleString()} ج.م</span>
+                    <span className="font-bold text-[#16A34A] print:text-black" dir="ltr">{Number(printingPurchase.paid || 0).toLocaleString()} ج.م</span>
                   </div>
                   {printingPurchase.total - printingPurchase.paid > 0 && (
                      <div className="flex justify-between items-center text-sm pt-3">
                        <span className="font-bold text-[#DC2626] print:text-black">المبلغ المتبقي للآجل:</span>
-                       <span className="font-bold text-[#DC2626] print:text-black" dir="ltr">{(printingPurchase.total - printingPurchase.paid).toLocaleString()} ج.م</span>
+                       <span className="font-bold text-[#DC2626] print:text-black" dir="ltr">{Number((printingPurchase.total || 0) - (printingPurchase.paid || 0)).toLocaleString()} ج.م</span>
                      </div>
                   )}
                 </div>
@@ -1284,7 +1314,7 @@ export default function Suppliers() {
           supplierToDelete ? (
             <div className="flex flex-col gap-1 mt-1 text-xs">
               <div>الهاتف: {supplierToDelete.phone || 'غير مسجل'}</div>
-              <div>الرصيد المستحق: {supplierToDelete.balance.toLocaleString()} ج.م</div>
+              <div>الرصيد المستحق: {Number(supplierToDelete.balance || 0).toLocaleString()} ج.م</div>
             </div>
           ) : undefined
         }

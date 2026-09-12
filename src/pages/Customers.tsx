@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, Users as UsersIcon, X, History, User, Banknote, Edit2, Trash2, Printer, MessageCircle, Share2, Loader2 } from 'lucide-react';
 import { useAppData, Customer } from '@/src/context/AppDataContext';
@@ -20,8 +21,9 @@ export default function Customers() {
     name: string;
     phone: string;
     balance: number | string;
+    date: string;
   }>({
-    name: '', phone: '', balance: ''
+    name: '', phone: '', balance: '', date: new Date().toISOString().split('T')[0]
   });
 
   const filteredCustomers = useMemo(() => {
@@ -42,6 +44,7 @@ export default function Customers() {
         name: newCustomer.name,
         phone: newCustomer.phone,
         balance: Number(newCustomer.balance) || 0,
+        createdAt: newCustomer.date ? new Date(newCustomer.date).getTime() : Date.now(),
       };
       if (editingCustomer) {
         await updateCustomer(editingCustomer.id, payload);
@@ -58,7 +61,7 @@ export default function Customers() {
   const closeModal = () => {
     setIsAddModalOpen(false);
     setEditingCustomer(null);
-    setNewCustomer({ name: '', phone: '', balance: '' });
+    setNewCustomer({ name: '', phone: '', balance: '', date: new Date().toISOString().split('T')[0] });
   };
 
   const openEditModal = (customer: Customer) => {
@@ -66,7 +69,8 @@ export default function Customers() {
     setNewCustomer({
       name: customer.name,
       phone: customer.phone,
-      balance: customer.balance === 0 ? '' : customer.balance
+      balance: customer.balance === 0 ? '' : customer.balance,
+      date: customer.createdAt ? new Date(customer.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setIsAddModalOpen(true);
   };
@@ -316,7 +320,7 @@ export default function Customers() {
         <button 
           onClick={() => {
             setEditingCustomer(null);
-            setNewCustomer({ name: '', phone: '', balance: 0 });
+            setNewCustomer({ name: '', phone: '', balance: '', date: new Date().toISOString().split('T')[0] });
             setIsAddModalOpen(true);
           }}
           className="inline-flex items-center justify-center gap-2 rounded-md bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] cursor-pointer"
@@ -350,9 +354,9 @@ export default function Customers() {
                 لا يوجد عملاء مطابقين للبحث
               </div>
             ) : (
-              filteredCustomers.map((customer) => (
+              filteredCustomers.map((customer, idx) => (
                 <div 
-                  key={customer.id} 
+                  key={customer.id ? `customer-${customer.id}` : `customer-idx-${idx}`} 
                   className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 space-y-3 shadow-xs"
                 >
                   <div className="flex justify-between items-start gap-2">
@@ -387,8 +391,8 @@ export default function Customers() {
 
                     <div className="text-left">
                       <span className="block text-[10px] text-slate-500 font-medium">الرصيد المالي</span>
-                      <span className={`font-black text-base font-mono ${customer.balance > 0 ? 'text-[#DC2626]' : customer.balance < 0 ? 'text-[#16A34A]' : 'text-[#64748B]'}`}>
-                        {customer.balance.toLocaleString()} <span className="text-[11px] font-normal">ج.م</span>
+                      <span className={`font-black text-base font-mono ${Number(customer.balance || 0) > 0 ? 'text-[#DC2626]' : Number(customer.balance || 0) < 0 ? 'text-[#16A34A]' : 'text-[#64748B]'}`}>
+                        {Number(customer.balance || 0).toLocaleString()} <span className="text-[11px] font-normal">ج.م</span>
                       </span>
                     </div>
                   </div>
@@ -472,9 +476,9 @@ export default function Customers() {
                     </td>
                   </tr>
                 ) : (
-                  filteredCustomers.map((customer) => (
+                  filteredCustomers.map((customer, idx) => (
                     <tr 
-                      key={customer.id} 
+                      key={customer.id ? `customer-${customer.id}` : `customer-idx-${idx}`} 
                       className="hover:bg-[#F8FAFC] transition-colors"
                     >
                       <td className="px-6 py-4 font-mono text-xs font-bold text-[#475569]">{customer.serialNumber}</td>
@@ -488,8 +492,8 @@ export default function Customers() {
                       </td>
                       <td className="px-6 py-4 font-mono text-[#475569]">{customer.phone}</td>
                       <td className="px-6 py-4 font-bold" dir="ltr">
-                        <span className={customer.balance > 0 ? 'text-[#DC2626]' : customer.balance < 0 ? 'text-[#16A34A]' : 'text-[#64748B]'}>
-                          {customer.balance.toLocaleString()}
+                        <span className={Number(customer.balance || 0) > 0 ? 'text-[#DC2626]' : Number(customer.balance || 0) < 0 ? 'text-[#16A34A]' : 'text-[#64748B]'}>
+                          {Number(customer.balance || 0).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -622,11 +626,11 @@ export default function Customers() {
                 </div>
                 <div className="text-left bg-white px-5 py-3 rounded-xl shadow-sm border border-[#E2E8F0] w-full sm:w-auto print:shadow-none print:px-4">
                   <p className="text-xs text-[#475569] font-bold mb-1 block">الرصيد المالي الحالي</p>
-                  <p className={`text-2xl font-black ${selectedCustomer.balance > 0 ? 'text-[#DC2626]' : selectedCustomer.balance < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'} print:text-black font-mono`} dir="ltr">
-                    {Math.abs(selectedCustomer.balance).toLocaleString()} <span className="text-xs text-[#94A3B8] print:text-black">ج.م</span>
+                  <p className={`text-2xl font-black ${Number(selectedCustomer.balance || 0) > 0 ? 'text-[#DC2626]' : Number(selectedCustomer.balance || 0) < 0 ? 'text-[#16A34A]' : 'text-[#1E293B]'} print:text-black font-mono`} dir="ltr">
+                    {Math.abs(Number(selectedCustomer.balance || 0)).toLocaleString()} <span className="text-xs text-[#94A3B8] print:text-black">ج.م</span>
                   </p>
                   <p className="text-[11px] text-[#64748B] mt-0.5 text-center font-bold print:text-black">
-                    {selectedCustomer.balance > 0 ? 'مطلوب من العميل' : selectedCustomer.balance < 0 ? 'رصيد دائن للعميل' : 'حساب خالص غير مدين'}
+                    {Number(selectedCustomer.balance || 0) > 0 ? 'مطلوب من العميل' : Number(selectedCustomer.balance || 0) < 0 ? 'رصيد دائن للعميل' : 'حساب خالص غير مدين'}
                   </p>
                 </div>
               </div>
@@ -645,21 +649,26 @@ export default function Customers() {
                   <tbody className="divide-y divide-[#E2E8F0]">
                     {ledgerEntries.length > 0 ? (
                       ledgerEntries.map((row, idx) => (
-                        <tr key={`${row.id}-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
+                        <motion.tr
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15, delay: idx * 0.02 }}
+                          key={row.id ? `row-${row.id}-${idx}` : `row-idx-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#475569] font-mono whitespace-nowrap print:text-black">{row.date}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#1E293B] font-bold print:text-black">{row.description}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center text-[#DC2626] font-bold print:text-black font-mono" dir="ltr">
-                            {row.debit > 0 ? row.debit.toLocaleString() : '-'}
+                            {row.debit > 0 ? Number(row.debit || 0).toLocaleString() : '-'}
                           </td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center text-[#16A34A] font-bold print:text-black font-mono" dir="ltr">
-                            {row.credit > 0 ? row.credit.toLocaleString() : '-'}
+                            {row.credit > 0 ? Number(row.credit || 0).toLocaleString() : '-'}
                           </td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center font-bold print:text-black font-mono" dir="ltr">
                             <span className={row.balance > 0 ? 'text-[#DC2626] print:text-black' : row.balance < 0 ? 'text-[#16A34A] print:text-black' : 'text-[#64748B] print:text-black'}>
-                              {Math.abs(row.balance).toLocaleString()} {row.balance > 0 ? 'مدين' : row.balance < 0 ? 'دائن' : ''}
+                              {Math.abs(Number(row.balance || 0)).toLocaleString()} {row.balance > 0 ? 'مدين' : row.balance < 0 ? 'دائن' : ''}
                             </span>
                           </td>
-                        </tr>
+                        </motion.tr>
                       ))
                     ) : (
                       <tr>
@@ -697,7 +706,7 @@ export default function Customers() {
             <form onSubmit={handlePayment} className="p-5 space-y-4">
               <div className="bg-[#EFF6FF] p-3 rounded-lg border border-[#BFDBFE]">
                 <p className="text-xs text-[#1D4ED8] font-bold mb-1">العميل: {paymentCustomer.name}</p>
-                <p className="text-sm text-[#1E3A8A] font-bold">الرصيد المستحق: <span className="text-xl inline-block mr-1">{paymentCustomer.balance.toLocaleString()}</span> ج.م</p>
+                <p className="text-sm text-[#1E3A8A] font-bold">الرصيد المستحق: <span className="text-xl inline-block mr-1">{Number(paymentCustomer.balance || 0).toLocaleString()}</span> ج.م</p>
               </div>
 
               <div className="space-y-1 mt-4">
@@ -753,6 +762,10 @@ export default function Customers() {
                 <input type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" dir="ltr" />
               </div>
               <div className="space-y-1">
+                <label className="text-xs font-bold text-[#475569]">التاريخ</label>
+                <input type="date" value={newCustomer.date} onChange={e => setNewCustomer({...newCustomer, date: e.target.value})} className="w-full border border-[#E2E8F0] rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none" dir="ltr" />
+              </div>
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#475569]">الرصيد الإفتتاحي (ج.م)</label>
                 <input 
                   type="number" 
@@ -790,7 +803,7 @@ export default function Customers() {
           customerToDelete ? (
             <div className="flex flex-col gap-1 mt-1 text-xs">
               <div>الهاتف: {customerToDelete.phone || 'غير مسجل'}</div>
-              <div>الرصيد الحالي: {customerToDelete.balance.toLocaleString()} ج.م</div>
+              <div>الرصيد الحالي: {Number(customerToDelete.balance || 0).toLocaleString()} ج.م</div>
               {customerToDelete.serialNumber && <div>كود العميل: {customerToDelete.serialNumber}</div>}
             </div>
           ) : undefined
