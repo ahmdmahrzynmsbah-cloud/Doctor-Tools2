@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, Users as UsersIcon, X, History, User, Banknote, Edit2, Trash2, Printer, MessageCircle, Share2, Loader2 } from 'lucide-react';
 import { useAppData, Customer } from '@/src/context/AppDataContext';
@@ -649,12 +648,7 @@ export default function Customers() {
                   <tbody className="divide-y divide-[#E2E8F0]">
                     {ledgerEntries.length > 0 ? (
                       ledgerEntries.map((row, idx) => (
-                        <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={row.id ? `row-${row.id}-${idx}` : `row-idx-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
+                        <tr key={row.id ? `row-${row.id}-${idx}` : `row-idx-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#475569] font-mono whitespace-nowrap print:text-black">{row.date}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#1E293B] font-bold print:text-black">{row.description}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center text-[#DC2626] font-bold print:text-black font-mono" dir="ltr">
@@ -668,7 +662,7 @@ export default function Customers() {
                               {Math.abs(Number(row.balance || 0)).toLocaleString()} {row.balance > 0 ? 'مدين' : row.balance < 0 ? 'دائن' : ''}
                             </span>
                           </td>
-                        </motion.tr>
+                        </tr>
                       ))
                     ) : (
                       <tr>

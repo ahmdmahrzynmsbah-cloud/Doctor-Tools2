@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, Filter, Search, Edit, Trash2, X, PackageOpen, LayoutGrid, Eye, Printer, MapPin, ScanLine } from 'lucide-react';
 import { useAppData, InventoryItem } from '@/src/context/AppDataContext';
@@ -416,12 +415,7 @@ export default function Inventory() {
                 </tr>
               ) : (
                 filteredInventory.map((item, idx) => (
-                  <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={item.id ? `inventory-${item.id}` : `inventory-idx-${idx}`} className="hover:bg-[#F8FAFC]">
+                  <tr key={item.id ? `inventory-${item.id}` : `inventory-idx-${idx}`} className="hover:bg-[#F8FAFC]">
                     <td className="px-6 py-4 font-mono font-bold text-[#1E293B]">{item.code}</td>
                     <td className="px-6 py-4">
                       <p className="font-bold text-[#1E293B] text-base">{item.name}</p>
@@ -456,7 +450,7 @@ export default function Inventory() {
                          <button onClick={() => setItemToDelete(item)} className="hover:text-[#DC2626] transition-colors cursor-pointer bg-transparent border-none" title="حذف الصنف"><Trash2 className="w-5 h-5"/></button>
                        </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>

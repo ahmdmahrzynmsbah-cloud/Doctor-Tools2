@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, Search, FileText, X, Printer, Edit, Trash2, ListStart, List, Barcode, Receipt, Save, Download, MessageCircle, Share2, Loader2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -921,12 +920,7 @@ export default function Invoices() {
                             if (!invItem) return null;
                             const qtyTotal = item.price * item.qty;
                             return (
-                              <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={`invoice-item-${idx}`} className="hover:bg-[#F8FAFC] transition-colors">
+                              <tr key={`invoice-item-${idx}`} className="hover:bg-[#F8FAFC] transition-colors">
                                 <td className="py-3 px-4">
                                   <p className="font-bold text-[#1E293B]">{invItem.name}</p>
                                   {showDetailsAndPrices && <p className="text-xs text-[#94A3B8]">كود: {invItem.code}</p>}
@@ -977,7 +971,7 @@ export default function Invoices() {
                                     <Trash2 className="w-5 h-5" />
                                   </button>
                                 </td>
-                              </motion.tr>
+                              </tr>
                             );
                           })}
                         </tbody>
@@ -1140,12 +1134,7 @@ export default function Invoices() {
                       const isFullyPaid = inv.paid >= inv.total;
                       const customerName = inv.isQuote && inv.customCustomerName ? inv.customCustomerName : (customer?.name || 'عميل نقدي');
                       return (
-                        <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={inv.id ? `invoice-${inv.id}` : `invoice-idx-${idx}`} className="hover:bg-[#F8FAFC]">
+                        <tr key={inv.id ? `invoice-${inv.id}` : `invoice-idx-${idx}`} className="hover:bg-[#F8FAFC]">
                           <td className="px-6 py-4 font-mono font-bold text-[#2180B2]">{inv.invoiceNumber}</td>
                           <td className="px-6 py-4 text-[#475569]">{new Date(inv.date).toLocaleDateString()}</td>
                           <td className="px-6 py-4 font-bold text-[#1E293B]">
@@ -1191,7 +1180,7 @@ export default function Invoices() {
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </td>
-                        </motion.tr>
+                        </tr>
                       );
                     })
                   )}

@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react';
 import React, { useMemo } from 'react';
 import { useAppData } from '@/src/context/AppDataContext';
 import { Package, FileText, ArrowUpRight, TrendingDown, Wallet, CreditCard, AlertTriangle, ArrowLeft, Database, CheckCircle2, X } from 'lucide-react';
@@ -281,12 +280,7 @@ export default function Dashboard() {
                        const formattedDate = `${dateStr.getHours().toString().padStart(2, '0')}:${dateStr.getMinutes().toString().padStart(2, '0')} ${dateStr.getDate().toString().padStart(2, '0')}/${(dateStr.getMonth()+1).toString().padStart(2, '0')}/${dateStr.getFullYear()}`;
 
                        return (
-                         <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={inv.id ? `recent-inv-${inv.id}` : `recent-inv-idx-${idx}`} className="hover:bg-[#F8FAFC] transition-colors">
+                         <tr key={inv.id ? `recent-inv-${inv.id}` : `recent-inv-idx-${idx}`} className="hover:bg-[#F8FAFC] transition-colors">
                            <td className="py-4 px-6 font-bold text-[#1E293B]">SA-{inv.invoiceNumber}</td>
                            <td className="py-4 px-6 font-bold text-[#1E293B]">{customerName}</td>
                            <td className="py-4 px-6 text-[#94A3B8] font-mono text-right" dir="ltr">{formattedDate}</td>
@@ -300,7 +294,7 @@ export default function Dashboard() {
                              )}
                            </td>
                            <td className="py-4 px-6 font-black text-[#1E293B] text-left">{inv.total} <span className="text-xs font-bold text-[#94A3B8]">ج.م</span></td>
-                         </motion.tr>
+                         </tr>
                        );
                      })}
                      {recentInvoices.length === 0 && (

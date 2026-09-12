@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useMemo } from 'react';
 import { Plus, Search, X, Factory, ArrowDownToLine, ShoppingCart, History, Edit2, Trash2, Banknote, Printer, Share2, Loader2, MessageCircle } from 'lucide-react';
 import { useAppData, Supplier } from '@/src/context/AppDataContext';
@@ -668,12 +667,7 @@ export default function Suppliers() {
                 </tr>
               ) : (
                 filteredSuppliers.map((supplier, idx) => (
-                  <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={supplier.id ? `supplier-${supplier.id}` : `supplier-idx-${idx}`} className="hover:bg-[#F8FAFC]">
+                  <tr key={supplier.id ? `supplier-${supplier.id}` : `supplier-idx-${idx}`} className="hover:bg-[#F8FAFC]">
                     <td className="px-6 py-4 font-bold text-[#1E293B]">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[#E2E8F0] flex items-center justify-center text-[#475569]">
@@ -747,7 +741,7 @@ export default function Suppliers() {
                         </button>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>
@@ -843,12 +837,7 @@ export default function Suppliers() {
                   <tbody className="divide-y divide-[#E2E8F0]">
                     {ledgerEntries.length > 0 ? (
                       ledgerEntries.map((row: any, idx) => (
-                        <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={row.id ? `row-${row.id}-${idx}` : `row-idx-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
+                        <tr key={row.id ? `row-${row.id}-${idx}` : `row-idx-${idx}`} className={row.isInitial ? 'bg-[#F1F5F9] print:bg-gray-100' : 'hover:bg-[#F8FAFC] transition-colors'}>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#475569] font-mono whitespace-nowrap print:text-black">{row.date}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-[#1E293B] font-bold print:text-black">{row.description}</td>
                           <td className="px-3.5 py-3 text-xs sm:text-sm text-center text-[#DC2626] font-bold print:text-black font-mono" dir="ltr">
@@ -889,7 +878,7 @@ export default function Suppliers() {
                               </button>
                             )}
                           </td>
-                        </motion.tr>
+                        </tr>
                       ))
                     ) : (
                       <tr>
@@ -1246,12 +1235,7 @@ export default function Suppliers() {
                       const invItem = inventory.find(i => i.id === item.itemId);
                       const unitPrice = item.price ?? item.unitPrice ?? 0;
                       return (
-                        <motion.tr
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15, delay: idx * 0.02 }}
-                          key={`purchase-item-${idx}`}>
+                        <tr key={`purchase-item-${idx}`}>
                           <td className="py-4 px-4 text-sm text-[#64748B] font-bold print:text-black">{idx + 1}</td>
                           <td className="py-4 px-4 print:text-black">
                             <span className="font-bold text-[#1E293B] block">{invItem ? invItem.name : 'صنف محذوف'}</span>
@@ -1260,7 +1244,7 @@ export default function Suppliers() {
                           <td className="py-4 px-4 text-sm text-center font-bold text-[#475569] print:text-black" dir="ltr">{item.quantity}</td>
                           <td className="py-4 px-4 text-sm text-center font-bold text-[#475569] print:text-black" dir="ltr">{Number(unitPrice || 0).toLocaleString()}</td>
                           <td className="py-4 px-4 text-sm font-bold text-[#1E293B] text-left print:text-black" dir="ltr">{Number((item.quantity || 0) * (unitPrice || 0)).toLocaleString()} ج.م</td>
-                        </motion.tr>
+                        </tr>
                       );
                     })}
                   </tbody>
