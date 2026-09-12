@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix: Doctor Tools",
+  "description": "نظام متكامل لإدارة العيادات والمستلزمات الطبية والفواتير والمخزون",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
